@@ -82,14 +82,14 @@ def ad_peer_keys(sender, instance: Peer, **kwargs):
 
 
 @receiver(post_save, sender=Server)
-def add_server_keys(sender, instance: Server, **kwargs):
+def update_conf_from_server(sender, instance: Server, **kwargs):
     from app.utils import wg_tools
 
     wg_tools.generate_wg_conf(server=instance)
 
 
 @receiver(post_save, sender=Peer)
-def ad_peer_keys(sender, instance: Peer, **kwargs):
+def update_conf_from_peer(sender, instance: Peer, **kwargs):
     from app.utils import wg_tools
 
     wg_tools.generate_wg_conf(server=instance.server)

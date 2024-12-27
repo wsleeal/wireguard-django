@@ -34,7 +34,7 @@ def generate_wg_conf(server: Server):
     config_dir = os.path.join(settings.BASE_DIR, "wg_configs")
     os.makedirs(config_dir, exist_ok=True)
 
-    file_path = os.path.join(config_dir, "wg0.conf")
+    file_path = os.path.join(config_dir, f"wg{server.pk}.conf")
 
     with open(file_path, "w", encoding="utf-8") as file:
         file.write(config_content)
@@ -44,7 +44,9 @@ def generate_wg_conf(server: Server):
     for interface in interfaces:
         subprocess.run(["wg-quick", "down", interface])
 
-    subprocess.run(["wg-quick", "up", file_path])
+    arquivos = os.listdir(config_dir)
+    for arquivo in arquivos:
+        subprocess.run(["wg-quick", "up", os.path.join(config_dir, arquivo)])
 
 
 def generate_peer_conf(peer: Peer) -> str:
