@@ -1,108 +1,65 @@
-from django.core.validators import validate_ipv4_address
 from django.db.models.signals import pre_save, post_save, pre_delete
+from django.core.validators import validate_ipv4_address
 from django.dispatch import receiver
 from django.db import models
-from nacl.public import PrivateKey
-from nacl.encoding import Base64Encoder
-from django.conf import settings
+from app.utils import wg_tools
 
 
-import os
-import base64
+class BaseModel(models.Model):
+    class Meta:
+        abstract = True
+
+    private_key = models.CharField(max_length=44, default=wg_tools.generate_private_key, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def public_key(self):
+        return wg_tools.generate_public_key(self.private_key)
 
 
-def generate_wg_psk():
-    psk_bytes = os.urandom(32)
-    psk_base64 = base64.b64encode(psk_bytes).decode("utf-8")
-    return psk_base64
-
-
-def get_next_ip(server: "Server"):
-    address = server.address
-    last_peer = Peer.objects.filter(server=server).last()
-    if last_peer:
-        address = last_peer.address
-
-    parts = address.split(".")
-    parts[-1] = str(int(parts[-1]) + 1)
-    next_ip = ".".join(parts)
-    return next_ip
-
-
-def generate_keys():
-    private = PrivateKey.generate()
-    public = private.public_key
-
-    private_utf8 = private.encode(Base64Encoder).decode()
-    public_utf8 = public.encode(Base64Encoder).decode()
-
-    return private_utf8, public_utf8
-
-
-class Server(models.Model):
+class Server(BaseModel):
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     listen_port = models.SmallIntegerField(default=51820, unique=True)
-    private_key = models.CharField(max_length=44, editable=False)
-    public_key = models.CharField(max_length=44, editable=False)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     persistent_keepalive = models.SmallIntegerField(default=25)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    file = models.FileField(upload_to="wg_configs", null=True, editable=False)
+    file_md5 = models.CharField(max_length=255, null=True, editable=False)
 
     def __str__(self):
         return self.name
 
 
-class Peer(models.Model):
+class Peer(BaseModel):
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField(protocol="ipv4", editable=False, validators=(validate_ipv4_address,))
-    private_key = models.CharField(max_length=44, editable=False)
-    public_key = models.CharField(max_length=44, editable=False)
-    preshared_key = models.CharField(max_length=44, editable=False, default=generate_wg_psk)
+    preshared_key = models.CharField(max_length=44, editable=False, default=wg_tools.generate_preshared_key)
     allowed_ips = models.CharField(max_length=255, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
-@receiver(pre_save, sender=Server)
-def add_server_keys(sender, instance: Server, **kwargs):
-    if not instance.created_at:
-        instance.private_key, instance.public_key = generate_keys()
-
-
 @receiver(pre_save, sender=Peer)
-def ad_peer_keys(sender, instance: Peer, **kwargs):
+def add_peer_ip(sender, instance: Peer, **kwargs):
     if not instance.created_at:
-        instance.private_key, instance.public_key = generate_keys()
-        instance.address = get_next_ip(instance.server)
+        instance.address = wg_tools.find_next_available_ip(instance.server)
 
 
 @receiver(post_save, sender=Server)
 def update_conf_from_server(sender, instance: Server, **kwargs):
-    from app.utils import wg_tools
-
-    wg_tools.generate_wg_conf(server=instance)
+    wg_tools.generate_wg_conf_file(server=instance)
+    wg_tools.up_wg_interface(server=instance)
 
 
 @receiver(post_save, sender=Peer)
 def update_conf_from_peer(sender, instance: Peer, **kwargs):
-    from app.utils import wg_tools
-
-    wg_tools.generate_wg_conf(server=instance.server)
+    wg_tools.generate_wg_conf_file(server=instance.server)
+    wg_tools.up_wg_interface(server=instance.server)
 
 
 @receiver(pre_delete, sender=Server)
-def delete_wg_conf(sender, instance: Server, **kwargs):
-
-    config_dir = os.path.join(settings.BASE_DIR, "wg_configs")
-    file_path = os.path.join(config_dir, f"wg{instance.pk}.conf")
-
-    try:
-        os.remove(file_path)
-    except:
-        pass
+def delete_server_conf(sender, instance: Server, **kwargs):
+    instance.file.delete(save=False)

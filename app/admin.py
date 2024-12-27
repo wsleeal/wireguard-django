@@ -4,9 +4,9 @@ from app import models
 
 @admin.register(models.Server)
 class ServerAdmin(admin.ModelAdmin):
-    readonly_fields = ("private_key", "public_key")
+    readonly_fields = ("file", "file_md5")
 
 
 @admin.register(models.Peer)
 class PeerAdmin(admin.ModelAdmin):
-    readonly_fields = ("private_key", "public_key", "address", "preshared_key")
+    pass

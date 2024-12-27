@@ -1,10 +1,17 @@
-from app.models import Server, Peer
-from django.conf import settings
+from nacl.public import PrivateKey
+from nacl.encoding import Base64Encoder
 import subprocess
 import os
 
+try:
+    from app.models import Server, Peer
+except:
+    pass
 
-def generate_wg_conf(server: Server):
+
+def generate_wg_conf_content(server: "Server"):
+
+    from app.models import Peer
 
     config_lines = [
         "[Interface]",
@@ -16,7 +23,7 @@ def generate_wg_conf(server: Server):
         "",
     ]
 
-    for peer in Peer.objects.filter(server=server):
+    for peer in Peer.objects.filter(server=server).all():
 
         allowed_ips = peer.address + "/32"
         if peer.allowed_ips:
@@ -31,25 +38,12 @@ def generate_wg_conf(server: Server):
 
     config_content = "\n".join(config_lines)
 
-    config_dir = os.path.join(settings.BASE_DIR, "wg_configs")
-    os.makedirs(config_dir, exist_ok=True)
-
-    file_path = os.path.join(config_dir, f"wg{server.pk}.conf")
-
-    with open(file_path, "w", encoding="utf-8") as file:
-        file.write(config_content)
-
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True)
-    interfaces = result.stdout.split()
-    for interface in interfaces:
-        subprocess.run(["wg-quick", "down", interface])
-
-    arquivos = os.listdir(config_dir)
-    for arquivo in arquivos:
-        subprocess.run(["wg-quick", "up", os.path.join(config_dir, arquivo)])
+    return config_content
 
 
-def generate_peer_conf(peer: Peer) -> str:
+def generate_peer_conf_content(peer: "Peer") -> str:
+
+    from app.models import Peer
 
     allowed_ips = set()
 
@@ -84,3 +78,74 @@ def generate_peer_conf(peer: Peer) -> str:
     config_content = "\n".join(config_lines)
 
     return config_content
+
+
+def generate_wg_conf_file(server: "Server"):
+
+    from django.core.files import File
+    from io import BytesIO
+    import hashlib
+
+    content = generate_wg_conf_content(server)
+    content_md5 = hashlib.md5(content.encode()).hexdigest()
+
+    if server.file:
+        if os.path.isfile(server.file.path):
+            if server.file_md5 == content_md5:
+                return
+
+    file_content = BytesIO(content.encode())
+    server.file.delete(save=False)
+    server.file = File(file_content, name=f"{server.name}.conf")
+    server.file_md5 = content_md5
+    server.save()
+
+
+def up_wg_interface(server: "Server"):
+
+    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True)
+    interfaces = result.stdout.split()
+    for interface in interfaces:
+        if interface == server.name:
+            subprocess.run(["wg-quick", "down", interface])
+
+    config_path = "/etc/wireguard"
+    for wg_conf in os.listdir(config_path):
+        file_path = os.path.join(config_path, wg_conf)
+        subprocess.run(["chmod", "600", file_path])
+        subprocess.run(["wg-quick", "up", file_path])
+
+
+def generate_private_key() -> str:
+    private_key = PrivateKey.generate()
+    private_key_base64 = private_key.encode(Base64Encoder).decode("utf-8")
+    return private_key_base64
+
+
+def generate_public_key(private_key_base64: str):
+    decoded_private_key = PrivateKey(Base64Encoder.decode(private_key_base64.encode()))
+    public_key = decoded_private_key.public_key
+    public_key_base64 = public_key.encode(Base64Encoder).decode("utf-8")
+    return public_key_base64
+
+
+def generate_preshared_key():
+    preshared_key = os.urandom(32)
+    preshared_key_base64 = Base64Encoder.encode(preshared_key).decode()
+    return preshared_key_base64
+
+
+def find_next_available_ip(server: "Server"):
+    from app.models import Peer
+
+    address = server.address
+    last_peer = Peer.objects.filter(server=server).last()
+
+    if last_peer:
+        address = last_peer.address
+
+    parts = address.split(".")
+    parts[-1] = str(int(parts[-1]) + 1)
+    next_ip = ".".join(parts)
+
+    return next_ip
