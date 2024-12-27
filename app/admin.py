@@ -10,3 +10,5 @@ class ServerAdmin(admin.ModelAdmin):
 @admin.register(models.Peer)
 class PeerAdmin(admin.ModelAdmin):
     readonly_fields = ("address",)
+
+    change_form_template = "custom_admin/change_form.html"

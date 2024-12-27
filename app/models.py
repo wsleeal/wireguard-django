@@ -62,4 +62,5 @@ def update_conf_from_peer(sender, instance: Peer, **kwargs):
 
 @receiver(pre_delete, sender=Server)
 def delete_server_conf(sender, instance: Server, **kwargs):
+    wg_tools.down_wg_interface(server=instance)
     instance.file.delete(save=False)

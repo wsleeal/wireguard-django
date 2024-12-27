@@ -1,0 +1,25 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const submitRow = document.querySelector(".submit-row");
+            if (submitRow) {
+                const customButton = document.createElement("input");
+                customButton.type = "submit";
+                customButton.value = "Download config file";
+                customButton.onclick = function (event) {
+                    event.preventDefault();
+                    window.location.href = "http://127.0.0.1:8000/index/";
+                };
+
+                const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
+
+                if (saveButton) {
+                    submitRow.insertBefore(customButton, saveButton.nextSibling);
+                }
+            }
+        });
+    </script>
+{% endblock %}
