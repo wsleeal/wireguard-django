@@ -39,15 +39,12 @@ def generate_wg_conf(server: Server):
     with open(file_path, "w", encoding="utf-8") as file:
         file.write(config_content)
 
-    try:
-        subprocess.check_output("wg-quick down wg0", shell=True, text=True)
-    except:
-        pass
+    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True)
+    interfaces = result.stdout.split()
+    for interface in interfaces:
+        subprocess.run(["wg-quick", "down", interface])
 
-    try:
-        subprocess.check_output("wg-quick up wg0", shell=True, text=True)
-    except:
-        pass
+    subprocess.run(["wg-quick", "up", file_path])
 
 
 def generate_peer_conf(peer: Peer) -> str:

@@ -1,9 +1,10 @@
 from django.core.validators import validate_ipv4_address
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.db import models
 from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
+
 
 import os
 import base64
@@ -78,3 +79,17 @@ def ad_peer_keys(sender, instance: Peer, **kwargs):
     if not instance.created_at:
         instance.private_key, instance.public_key = generate_keys()
         instance.address = get_next_ip(instance.server)
+
+
+@receiver(post_save, sender=Server)
+def add_server_keys(sender, instance: Server, **kwargs):
+    from app.utils import wg_tools
+
+    wg_tools.generate_wg_conf(server=instance)
+
+
+@receiver(post_save, sender=Peer)
+def ad_peer_keys(sender, instance: Peer, **kwargs):
+    from app.utils import wg_tools
+
+    wg_tools.generate_wg_conf(server=instance.server)
