@@ -1,0 +1,21 @@
+name: wireguard
+
+services:
+  backend:
+    build: .
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      # - SYS_MODULE
+    environment:
+      - TZ=America/Sao_Paulo 
+    volumes:
+      - .:/code
+      - ./wg_configs:/etc/wireguard 
+      # - /lib/modules:/lib/modules:ro
+    ports:
+      - 8000:8000
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.ip_forward=1
+    restart: unless-stopped
