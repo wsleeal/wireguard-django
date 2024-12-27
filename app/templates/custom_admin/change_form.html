@@ -12,7 +12,7 @@
                 customButton.value = "Download config";
                 customButton.onclick = function (event) {
                     event.preventDefault();
-                    window.location.href = "{% url 'index' original.id %}";
+                    window.location.href = "{% url 'download-peer-conf' original.id %}";
                 };
 
                 const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");

@@ -3,9 +3,11 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from app.models import Peer
 from app.utils import wg_tools
+from django.contrib.auth.decorators import login_required
 
 
-def index(request: WSGIRequest, id: int):
+@login_required
+def download_peer_conf(request: WSGIRequest, id: int):
 
     peer = get_object_or_404(Peer, id=id)
 
