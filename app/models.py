@@ -1,9 +1,10 @@
 from django.core.validators import validate_ipv4_address
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.dispatch import receiver
 from django.db import models
 from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
+from django.conf import settings
 
 
 import os
@@ -41,7 +42,7 @@ def generate_keys():
 class Server(models.Model):
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
-    listen_port = models.SmallIntegerField(default=51820)
+    listen_port = models.SmallIntegerField(default=51820, unique=True)
     private_key = models.CharField(max_length=44, editable=False)
     public_key = models.CharField(max_length=44, editable=False)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
@@ -93,3 +94,15 @@ def update_conf_from_peer(sender, instance: Peer, **kwargs):
     from app.utils import wg_tools
 
     wg_tools.generate_wg_conf(server=instance.server)
+
+
+@receiver(pre_delete, sender=Server)
+def delete_wg_conf(sender, instance: Server, **kwargs):
+
+    config_dir = os.path.join(settings.BASE_DIR, "wg_configs")
+    file_path = os.path.join(config_dir, f"wg{instance.pk}.conf")
+
+    try:
+        os.remove(file_path)
+    except:
+        pass
