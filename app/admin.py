@@ -4,9 +4,9 @@ from app import models
 
 @admin.register(models.Server)
 class ServerAdmin(admin.ModelAdmin):
-    readonly_fields = ("file", "file_md5")
+    pass
 
 
 @admin.register(models.Peer)
 class PeerAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = ("address",)
