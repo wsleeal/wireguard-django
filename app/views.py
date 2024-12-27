@@ -1,12 +1,13 @@
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import JsonResponse, HttpResponse
-from app.models import Server, Peer
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from app.models import Peer
 from app.utils import wg_tools
 
 
-def index(request: WSGIRequest):
+def index(request: WSGIRequest, id: int):
 
-    peer = Peer.objects.last()
+    peer = get_object_or_404(Peer, id=id)
 
     # Gerando o conteúdo do arquivo
     config_content = wg_tools.generate_peer_conf_content(peer)

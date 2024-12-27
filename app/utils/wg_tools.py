@@ -102,24 +102,24 @@ def generate_wg_conf_file(server: "Server"):
 
 
 def up_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True)
+    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
     interfaces = result.stdout.split()
     for interface in interfaces:
         if interface == server.name:
-            subprocess.run(["wg-quick", "down", interface])
+            subprocess.run(["wg-quick", "down", interface], check=True)
 
     config_path = "/etc/wireguard"
     file_path = os.path.join(config_path, f"{server.name}.conf")
-    subprocess.run(["chmod", "600", file_path])
-    subprocess.run(["wg-quick", "up", file_path])
+    subprocess.run(["chmod", "600", file_path], check=True)
+    subprocess.run(["wg-quick", "up", file_path], check=True)
 
 
 def down_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True)
+    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
     interfaces = result.stdout.split()
     for interface in interfaces:
         if interface == server.name:
-            subprocess.run(["wg-quick", "down", interface])
+            subprocess.run(["wg-quick", "down", interface], check=True)
 
 
 def generate_private_key() -> str:

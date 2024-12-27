@@ -2,16 +2,17 @@
 
 {% block extrahead %}
     {{ block.super }}
+    {% if original %}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const submitRow = document.querySelector(".submit-row");
             if (submitRow) {
                 const customButton = document.createElement("input");
                 customButton.type = "submit";
-                customButton.value = "Download config file";
+                customButton.value = "Download config";
                 customButton.onclick = function (event) {
                     event.preventDefault();
-                    window.location.href = "http://127.0.0.1:8000/index/";
+                    window.location.href = "{% url 'index' original.id %}";
                 };
 
                 const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
@@ -21,5 +22,8 @@
                 }
             }
         });
+        console.log("ID do objeto: {{ original.id }}");
+        console.log("Nome do objeto: {{ original.name }}");
     </script>
+    {% endif %}
 {% endblock %}
