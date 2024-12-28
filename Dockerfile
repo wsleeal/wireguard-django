@@ -35,8 +35,9 @@ RUN mkdir -p /etc/wireguard
 # Criar diretório para SQLite
 RUN mkdir -p /code/database
 
-# Copiar o script de entrypoint
+# Copiar o script de entrypoint e garantir permissões
 COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 # Expor as portas do aplicativo e WireGuard
 EXPOSE 8000 51820/udp
