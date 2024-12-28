@@ -1,5 +1,6 @@
 __pycache__/
 wg_configs/
+database/
 db.sqlite3
 .venv/
 *.pyc

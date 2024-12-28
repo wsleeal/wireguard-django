@@ -3,16 +3,16 @@ name: wireguard
 services:
   backend:
     build: .
+    image: wireguard-docker:latest
     container_name: wireguard
     cap_add:
       - NET_ADMIN
-      # - SYS_MODULE
     environment:
       - TZ=America/Sao_Paulo 
     volumes:
       - .:/code
+      - ./database:/code/database
       - ./wg_configs:/etc/wireguard 
-      # - /lib/modules:/lib/modules:ro
     ports:
       - 8000:8000
       - 51820:51820/udp

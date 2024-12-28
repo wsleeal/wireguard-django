@@ -29,12 +29,14 @@ RUN pip install --upgrade pip && \
 # Copiar o código do projeto para o contêiner
 COPY . .
 
-# Criar diretório para WireGuard (se necessário)
+# Criar diretório para WireGuard
 RUN mkdir -p /etc/wireguard
 
-# Copiar o script de entrypoint e garantir permissões
+# Criar diretório para SQLite
+RUN mkdir -p /code/database
+
+# Copiar o script de entrypoint
 COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
 
 # Expor as portas do aplicativo e WireGuard
 EXPOSE 8000 51820/udp
