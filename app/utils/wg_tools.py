@@ -51,8 +51,8 @@ def generate_peer_conf_content(peer: "Peer") -> str:
 
     for neighbor in Peer.objects.filter(server=peer.server).all():
 
-        if neighbor.pk == peer.pk:
-            continue
+        # if neighbor.pk == peer.pk:
+        #     continue
 
         if not neighbor.allowed_ips:
             continue
