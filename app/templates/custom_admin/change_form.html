@@ -1,9 +1,9 @@
 {% extends "admin/change_form.html" %}
 
 {% block extrahead %}
-
+    {% if original %}
     <div id="model-data-utils" data-url="{% url 'download-peer-conf' original.id %}"></div>
-
+    {% endif %}
     {{ block.super }}
 
     <!-- Modal -->
