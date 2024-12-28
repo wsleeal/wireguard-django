@@ -1,13 +1,10 @@
 {% extends "admin/change_form.html" %}
-{% load static %}
 
 {% block extrahead %}
 
     <div id="model-data-utils" data-url="{% url 'download-peer-conf' original.id %}"></div>
 
     {{ block.super }}
-
-    <button type="button" class="btn-open-modal">aaaaaaa</button>
 
     <!-- Modal -->
     <div id="custom-modal" class="modal">
@@ -17,7 +14,5 @@
             <div class="modal-body"></div>
         </div>
     </div>
-
-
 
 {% endblock %}

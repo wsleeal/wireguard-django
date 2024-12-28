@@ -2,25 +2,25 @@
 document.addEventListener("DOMContentLoaded", function () {
     const submitRow = document.querySelector(".submit-row");
     if (submitRow) {
-        const custonInput = document.createElement("input");
-        custonInput.type = "submit";
-        custonInput.value = "Download config";
-        custonInput.onclick = function (event) {
+        const custonInput1 = document.createElement("input");
+        custonInput1.type = "submit";
+        custonInput1.value = "Download config";
+        custonInput1.onclick = function (event) {
             event.preventDefault();
             const utils = document.getElementById("model-data-utils");
             const url = utils.getAttribute("data-url");
             window.location.href = url; 
         };
 
-        const custonButton= document.createElement("input");
-        custonButton.type = "submit";
-        custonButton.value = "Open Modal";
-        custonButton.className = "btn-open-modal";
-        custonButton.onclick = (event) => event.preventDefault(); 
+        const custonInput2= document.createElement("input");
+        custonInput2.type = "submit";
+        custonInput2.value = "Open Modal";
+        custonInput2.className = "btn-open-modal";
+        custonInput2.onclick = (event) => event.preventDefault(); 
         
         const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
-        submitRow.insertBefore(custonButton, saveButton.nextSibling);
-        submitRow.insertBefore(custonInput, saveButton.nextSibling);
+        // submitRow.insertBefore(custonInput2, saveButton.nextSibling);
+        submitRow.insertBefore(custonInput1, saveButton.nextSibling);
     }
 
     document.querySelectorAll(".btn-open-modal").forEach((button) => {
