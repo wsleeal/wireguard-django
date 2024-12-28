@@ -110,7 +110,6 @@ def up_wg_interface(server: "Server"):
 
     config_path = "/etc/wireguard"
     file_path = os.path.join(config_path, f"{server.name}.conf")
-    subprocess.run(["chmod", "600", file_path], check=True)
     subprocess.run(["wg-quick", "up", file_path], check=True)
 
 

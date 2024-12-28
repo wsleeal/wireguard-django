@@ -1,5 +1,6 @@
 from django.db.models.signals import pre_save, post_save, pre_delete
 from django.core.validators import validate_ipv4_address
+from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
 from django.db import models
 from app.utils import wg_tools
@@ -18,13 +19,16 @@ class BaseModel(models.Model):
         return wg_tools.generate_public_key(self.private_key)
 
 
+fs = FileSystemStorage(location="/etc/wireguard")
+
+
 class Server(BaseModel):
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     listen_port = models.SmallIntegerField(default=51820, unique=True)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     persistent_keepalive = models.SmallIntegerField(default=25)
-    file = models.FileField(upload_to="wg_configs", null=True, editable=False)
+    file = models.FileField(storage=fs, null=True, editable=False)
     file_md5 = models.CharField(max_length=255, null=True, editable=False)
 
     def __str__(self):
