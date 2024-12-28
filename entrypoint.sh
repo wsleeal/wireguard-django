@@ -1,5 +1,7 @@
 #!/bin/sh
 
+python manage.py migrate
+
 WIREGUARD_PATH="/etc/wireguard/"
 
 if [ -d "$WIREGUARD_PATH" ]; then

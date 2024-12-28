@@ -19,7 +19,7 @@ class BaseModel(models.Model):
         return wg_tools.generate_public_key(self.private_key)
 
 
-fs = FileSystemStorage(location="/etc/wireguard")
+fs = FileSystemStorage(location="/etc/wireguard", file_permissions_mode=0o600)
 
 
 class Server(BaseModel):
