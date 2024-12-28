@@ -39,11 +39,11 @@ RUN mkdir -p /code/database
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-# Expor as portas do aplicativo e WireGuard
-EXPOSE 8000 51820/udp
-
 # Definir o script de entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
+
+# Expor as portas do aplicativo e WireGuard
+EXPOSE 8000 51820-51830/udp
 
 # Comando padrão para rodar o servidor Django
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
