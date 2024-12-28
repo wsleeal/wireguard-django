@@ -1,29 +1,23 @@
 {% extends "admin/change_form.html" %}
+{% load static %}
 
 {% block extrahead %}
+
+    <div id="model-data-utils" data-url="{% url 'download-peer-conf' original.id %}"></div>
+
     {{ block.super }}
-    {% if original %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const submitRow = document.querySelector(".submit-row");
-            if (submitRow) {
-                const customButton = document.createElement("input");
-                customButton.type = "submit";
-                customButton.value = "Download config";
-                customButton.onclick = function (event) {
-                    event.preventDefault();
-                    window.location.href = "{% url 'download-peer-conf' original.id %}";
-                };
 
-                const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
+    <button type="button" class="btn-open-modal">aaaaaaa</button>
 
-                if (saveButton) {
-                    submitRow.insertBefore(customButton, saveButton.nextSibling);
-                }
-            }
-        });
-        console.log("ID do objeto: {{ original.id }}");
-        console.log("Nome do objeto: {{ original.name }}");
-    </script>
-    {% endif %}
+    <!-- Modal -->
+    <div id="custom-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Detalhes do Objeto</h2>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+
+
+
 {% endblock %}

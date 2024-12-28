@@ -17,6 +17,10 @@ class PeerAdmin(admin.ModelAdmin):
             if db_field.blank:
                 kwargs["queryset"] = models.Server.objects.filter(name="123")
 
-            if db_field.model:
-                print("ok")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    class Media:
+        js = ("js/custom_admin.js",)
+        css = {
+            "all": ("css/custom_admin.css",),
+        }
