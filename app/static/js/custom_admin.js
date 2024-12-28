@@ -1,26 +1,26 @@
 // ADICIONAR BOTAO PARA GERAR PEER.CONF
 document.addEventListener("DOMContentLoaded", function () {
-    const utils = document.getElementById("model-data-utils");
     const submitRow = document.querySelector(".submit-row");
     if (submitRow) {
-        const customButton = document.createElement("input");
-        customButton.type = "submit";
-        customButton.value = "Download config";
-        customButton.onclick = function (event) {
+        const custonInput = document.createElement("input");
+        custonInput.type = "submit";
+        custonInput.value = "Download config";
+        custonInput.onclick = function (event) {
             event.preventDefault();
-            if (utils) {
-                const url = utils.getAttribute("data-url");
-                window.location.href = url;
-            }
+            const utils = document.getElementById("model-data-utils");
+            const url = utils.getAttribute("data-url");
+            window.location.href = url; 
         };
 
-        const saveButton = submitRow.querySelector(
-            ".submit-row > input:nth-child(3)"
-        );
-
-        if (saveButton) {
-            submitRow.insertBefore(customButton, saveButton.nextSibling);
-        }
+        const custonButton= document.createElement("input");
+        custonButton.type = "submit";
+        custonButton.value = "Open Modal";
+        custonButton.className = "btn-open-modal";
+        custonButton.onclick = (event) => event.preventDefault(); 
+        
+        const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
+        submitRow.insertBefore(custonButton, saveButton.nextSibling);
+        submitRow.insertBefore(custonInput, saveButton.nextSibling);
     }
 
     document.querySelectorAll(".btn-open-modal").forEach((button) => {
