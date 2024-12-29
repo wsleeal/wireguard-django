@@ -1,5 +1,5 @@
 from django.core.handlers.wsgi import WSGIRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from app.models import Peer
 from app.utils import wg_tools
@@ -21,3 +21,7 @@ def download_peer_conf(request: WSGIRequest, id: int):
     response["Content-Disposition"] = f'attachment; filename="{peer.name}.conf"'
 
     return response
+
+
+def index(request):
+    return render(request, "qrcode.html")
