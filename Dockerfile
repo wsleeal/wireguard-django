@@ -35,6 +35,10 @@ RUN mkdir -p /etc/wireguard
 # Criar diretório para SQLite
 RUN mkdir -p /code/database
 
+# Criar o diretório de logs e garantir permissões
+RUN mkdir -p /code/logs
+RUN chmod 755 /code/logs
+
 # Copiar o script de entrypoint e garantir permissões
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh

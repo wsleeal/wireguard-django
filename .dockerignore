@@ -10,3 +10,4 @@ Dockerfile
 .dockerignore
 .git/
 .gitignore
+logs/

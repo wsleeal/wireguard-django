@@ -122,3 +122,117 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+import os
+from logging.handlers import RotatingFileHandler
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "[{asctime}] {levelname} {name} ({module}:{lineno}) {message}",
+#             "style": "{",
+#         },
+#         "simple": {
+#             "format": "[{asctime}] {levelname} {message}",
+#             "style": "{",
+#         },
+#     },
+#     "handlers": {
+#         "file": {
+#             "level": "INFO",
+#             "class": "logging.handlers.RotatingFileHandler",
+#             "filename": os.path.join(BASE_DIR, "logs", "django.log"),
+#             "maxBytes": 5 * 1024 * 1024,  # 5 MB
+#             "backupCount": 5,
+#             "formatter": "verbose",
+#         },
+#         "error_file": {
+#             "level": "ERROR",
+#             "class": "logging.handlers.RotatingFileHandler",
+#             "filename": os.path.join(BASE_DIR, "logs", "errors.log"),
+#             "maxBytes": 5 * 1024 * 1024,  # 5 MB
+#             "backupCount": 5,
+#             "formatter": "verbose",
+#         },
+#         "console": {
+#             "level": "DEBUG",
+#             "class": "logging.StreamHandler",
+#             "formatter": "simple",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["file", "console"],
+#             "level": "INFO",
+#             "propagate": True,
+#         },
+#         "django.request": {
+#             "handlers": ["error_file"],
+#             "level": "ERROR",
+#             "propagate": False,
+#         },
+#     },
+# }
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,  # Não desativa os loggers padrão do Django.
+    "formatters": {
+        "verbose": {  # Formato detalhado com nível de log, timestamp e mensagem.
+            "format": "[{asctime}] {levelname} {name} ({module}:{lineno}) {message}",
+            "style": "{",
+        },
+        "simple": {  # Formato simplificado para saídas básicas.
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        "require_debug_false": {  # Filtro que ativa logs apenas quando DEBUG=False.
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+    },
+    "handlers": {
+        "file": {  # Salva os logs em um arquivo local.
+            "level": "INFO",  # Captura logs de nível INFO e superiores.
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "logs/django_production.log"),  # Caminho do arquivo de log.
+            "formatter": "verbose",  # Usa o formato detalhado.
+        },
+        "console": {  # Mostra logs no console (útil para debugging local).
+            "level": "DEBUG",  # Captura logs de nível DEBUG e superiores.
+            "class": "logging.StreamHandler",
+            "formatter": "simple",  # Usa o formato simplificado.
+        },
+        "mail_admins": {  # Envia logs críticos para os administradores por e-mail.
+            "level": "ERROR",  # Captura logs de nível ERROR e superiores.
+            "filters": ["require_debug_false"],  # Ativo apenas com DEBUG=False.
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+    },
+    "loggers": {
+        "django": {  # Logger principal do Django.
+            "handlers": ["file"],  # Salva logs em arquivo.
+            "level": "INFO",  # Captura logs de nível INFO e superiores.
+            "propagate": True,  # Permite que os logs sejam passados para outros loggers.
+        },
+        "django.request": {  # Logger para erros relacionados a requisições HTTP.
+            "handlers": ["file", "mail_admins"],  # Envia e-mails e salva em arquivo.
+            "level": "ERROR",  # Captura logs de nível ERROR e superiores.
+            "propagate": False,  # Não propaga logs para outros loggers.
+        },
+        "django.security": {  # Logger para alertas de segurança.
+            "handlers": ["file", "mail_admins"],  # Salva em arquivo e envia e-mails.
+            "level": "WARNING",  # Captura logs de nível WARNING e superiores.
+            "propagate": False,  # Não propaga logs para outros loggers.
+        },
+        "django.db.backends": {  # Logger para atividades relacionadas ao banco de dados.
+            "handlers": ["file"],  # Salva logs em arquivo.
+            "level": "WARNING",  # Captura logs de nível WARNING e superiores.
+            "propagate": False,  # Não propaga logs para outros loggers.
+        },
+    },
+}

@@ -13,6 +13,7 @@ services:
     volumes:
       - .:/code
       # - ./database:/code/database
+      - ./logs:/code/logs
       - ./wg_configs:/etc/wireguard 
     ports:
       - 8000:8000
