@@ -18,6 +18,6 @@ def download_peer_conf(request: WSGIRequest, id: int):
     response = HttpResponse(config_content, content_type="text/plain")
 
     # Definindo o nome do arquivo para download
-    response["Content-Disposition"] = f'attachment; filename="{peer.name}.conf"'
+    response["Content-Disposition"] = 'attachment; filename="peer.conf"'
 
     return response
