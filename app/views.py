@@ -21,7 +21,3 @@ def download_peer_conf(request: WSGIRequest, id: int):
     response["Content-Disposition"] = f'attachment; filename="{peer.name}.conf"'
 
     return response
-
-
-def index(request):
-    return render(request, "qrcode.html")
