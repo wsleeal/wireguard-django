@@ -43,30 +43,25 @@ def generate_wg_conf_content(server: "Server"):
 
 def generate_peer_conf_content(peer: "Peer") -> str:
 
-    from app.models import Peer, Server
+    from app.models import Peer
 
     allowed_ips = set()
 
-    allowed_ips.add(f"{peer.server.address}/32")
+    neighbors = Peer.objects.filter(server=peer.server).exclude(pk=peer.pk)
 
-    for neighbor in Peer.objects.filter(server=peer.server).all():
-
-        if not neighbor.allowed_ips:
-            continue
-
-        if neighbor.pk == peer.pk:
-            continue
-
-        if peer.server.dst_host:
-            dst_host_allowed_ips = peer.server.dst_host.allowed_ips
-            if not dst_host_allowed_ips:
-                break
-            for cidr in dst_host_allowed_ips.split(","):
+    for neighbor in neighbors:
+        if neighbor.allowed_ips:
+            for cidr in neighbor.allowed_ips.split(","):
                 allowed_ips.add(cidr.strip())
-            break
 
-        for cidr in neighbor.allowed_ips.split(","):
-            allowed_ips.add(cidr.strip())
+    if peer.server.dst_host and peer.server.dst_host.allowed_ips:
+        allowed_ips.clear()
+        for cidr in peer.server.dst_host.allowed_ips.split(","):
+            if peer.pk != peer.server.pk:
+                allowed_ips.add(cidr.strip())
+
+    allowed_ips.add(f"{peer.server.address}/32")
+    allowed_ips.add(f"{peer.address}/32")
 
     config_lines = [
         "[Interface]",
