@@ -125,124 +125,59 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 import os
-from logging.handlers import RotatingFileHandler
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "verbose": {
-#             "format": "[{asctime}] {levelname} {name} ({module}:{lineno}) {message}",
-#             "style": "{",
-#         },
-#         "simple": {
-#             "format": "[{asctime}] {levelname} {message}",
-#             "style": "{",
-#         },
-#     },
-#     "handlers": {
-#         "file": {
-#             "level": "INFO",
-#             "class": "logging.handlers.RotatingFileHandler",
-#             "filename": os.path.join(BASE_DIR, "logs", "django.log"),
-#             "maxBytes": 5 * 1024 * 1024,  # 5 MB
-#             "backupCount": 5,
-#             "formatter": "verbose",
-#         },
-#         "error_file": {
-#             "level": "ERROR",
-#             "class": "logging.handlers.RotatingFileHandler",
-#             "filename": os.path.join(BASE_DIR, "logs", "errors.log"),
-#             "maxBytes": 5 * 1024 * 1024,  # 5 MB
-#             "backupCount": 5,
-#             "formatter": "verbose",
-#         },
-#         "console": {
-#             "level": "DEBUG",
-#             "class": "logging.StreamHandler",
-#             "formatter": "simple",
-#         },
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["file", "console"],
-#             "level": "INFO",
-#             "propagate": True,
-#         },
-#         "django.request": {
-#             "handlers": ["error_file"],
-#             "level": "ERROR",
-#             "propagate": False,
-#         },
-#     },
-# }
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,  # Não desativa os loggers padrão do Django.
+    "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {  # Formato detalhado com nível de log, timestamp e mensagem.
+        "verbose": {
             "format": "[{asctime}] {levelname} {name} ({module}:{lineno}) {message}",
             "style": "{",
         },
-        "simple": {  # Formato simplificado para saídas básicas.
+        "simple": {
             "format": "{levelname} {message}",
             "style": "{",
         },
     },
     "filters": {
-        "require_debug_false": {  # Filtro que ativa logs apenas quando DEBUG=False.
-            "()": "django.utils.log.RequireDebugFalse",
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
         },
     },
     "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
         "file": {
-            "level": "INFO",
+            "level": "WARNING",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, "logs", "django.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",
         },
-        "error_file": {
+        "request": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "errors.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "request_errors.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",
         },
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-        "mail_admins": {  # Envia logs críticos para os administradores por e-mail.
-            "level": "ERROR",
-            "filters": ["require_debug_false"],  #
-            "class": "django.utils.log.AdminEmailHandler",
-        },
     },
     "loggers": {
         "django": {
-            "handlers": ["file"],
-            "level": "INFO",
+            "handlers": ["file", "console"],
             "propagate": True,
         },
-        "django.request": {  # Logger para erros relacionados a requisições HTTP.
-            "handlers": ["error_file", "mail_admins"],  # Envia e-mails e salva em arquivo.
-            "level": "ERROR",  # Captura logs de nível ERROR e superiores.
-            "propagate": False,  # Não propaga logs para outros loggers.
-        },
-        "django.security": {  # Logger para alertas de segurança.
-            "handlers": ["file", "mail_admins"],  # Salva em arquivo e envia e-mails.
-            "level": "WARNING",  # Captura logs de nível WARNING e superiores.
-            "propagate": False,  # Não propaga logs para outros loggers.
-        },
-        "django.db.backends": {  # Logger para atividades relacionadas ao banco de dados.
-            "handlers": ["file"],  # Salva logs em arquivo.
-            "level": "WARNING",  # Captura logs de nível WARNING e superiores.
-            "propagate": False,  # Não propaga logs para outros loggers.
+        "django.request": {
+            "handlers": ["request"],
+            "level": "ERROR",
+            "propagate": False,
         },
     },
 }
