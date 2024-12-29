@@ -196,31 +196,41 @@ LOGGING = {
         },
     },
     "handlers": {
-        "file": {  # Salva os logs em um arquivo local.
-            "level": "INFO",  # Captura logs de nível INFO e superiores.
-            "class": "logging.FileHandler",
-            "filename": os.path.join(BASE_DIR, "logs/django_production.log"),  # Caminho do arquivo de log.
-            "formatter": "verbose",  # Usa o formato detalhado.
+        "file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "django.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB
+            "backupCount": 5,
+            "formatter": "verbose",
         },
-        "console": {  # Mostra logs no console (útil para debugging local).
-            "level": "DEBUG",  # Captura logs de nível DEBUG e superiores.
+        "error_file": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "logs", "errors.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB
+            "backupCount": 5,
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "simple",  # Usa o formato simplificado.
+            "formatter": "simple",
         },
         "mail_admins": {  # Envia logs críticos para os administradores por e-mail.
-            "level": "ERROR",  # Captura logs de nível ERROR e superiores.
-            "filters": ["require_debug_false"],  # Ativo apenas com DEBUG=False.
+            "level": "ERROR",
+            "filters": ["require_debug_false"],  #
             "class": "django.utils.log.AdminEmailHandler",
         },
     },
     "loggers": {
-        "django": {  # Logger principal do Django.
-            "handlers": ["file"],  # Salva logs em arquivo.
-            "level": "INFO",  # Captura logs de nível INFO e superiores.
-            "propagate": True,  # Permite que os logs sejam passados para outros loggers.
+        "django": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
         },
         "django.request": {  # Logger para erros relacionados a requisições HTTP.
-            "handlers": ["file", "mail_admins"],  # Envia e-mails e salva em arquivo.
+            "handlers": ["error_file", "mail_admins"],  # Envia e-mails e salva em arquivo.
             "level": "ERROR",  # Captura logs de nível ERROR e superiores.
             "propagate": False,  # Não propaga logs para outros loggers.
         },
