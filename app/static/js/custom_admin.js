@@ -32,7 +32,27 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             const modal = document.getElementById("custom-modal");
             const id = this.getAttribute("data-id");
-            modal.querySelector(".modal-body").innerHTML = `CARREGAR QRCODE AQUI`;
+
+            const wireGuardConfig = `
+            [Interface]
+            Address = 1.1.1.2
+            PrivateKey = MvWgvrgrvDwLSFk7kVBwcsb/DsOIJx8e9mRUN+X9i2Y=
+            ListenPort = 51820
+
+            [Peer]
+            PublicKey = rT8Z4KP4fdgbMmPZDIQEoNk9mt0F36mMN4BsjnOMckk=
+            PresharedKey = k0OEOyRNJ9E9lpdot4GzJT2j87iI5VmQaHv5JNuzJ4Y=
+            Endpoint = 152.231.25.14:51820
+            AllowedIPs = 1.1.1.2/32, 1.1.1.1/32
+            PersistentKeepalive = 25
+            `;
+
+            new QRCode(document.getElementById("qrcode"), {
+                text: wireGuardConfig,
+                width: 256,
+                height: 256
+            });
+
             modal.style.display = "block";
         });
     });

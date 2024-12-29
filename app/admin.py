@@ -20,7 +20,10 @@ class PeerAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     class Media:
-        js = ("js/custom_admin.js",)
+        js = (
+            "js/custom_admin.js",
+            "https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js",
+        )
         css = {
             "all": ("css/custom_admin.css",),
         }
