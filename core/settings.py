@@ -184,34 +184,25 @@ LOGGING = {
 }
 
 JAZZMIN_SETTINGS = {
-    "site_title": "Library Admin",
-    "site_header": "Library",
-    "site_brand": "Library",
+    "site_title": "BELOT Admin",
+    "site_header": "BELOT",
+    "site_brand": "BELOT",
     "site_logo": "img/logo.png",
     "login_logo": "img/logo.png",
     "login_logo_dark": None,
     "site_logo_classes": "img-fluid border rounded",  # "img-circle",
     "site_icon": None,
-    "welcome_sign": "Welcome to the library",
-    "copyright": "Acme Library Ltd",
+    "welcome_sign": "Welcome to the BELOT",
+    "copyright": "GRUPO BELOT",
     "search_model": ["auth.User", "auth.Group"],
     "user_avatar": None,
-    ############
-    # Top Menu #
-    ############
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
         {"model": "auth.User"},
         {"app": "books"},
     ],
-    #############
-    # User Menu #
-    #############
     "usermenu_links": [{"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True}, {"model": "auth.user"}],
-    #############
-    # Side Menu #
-    #############
     # Whether to display the side menu
     "show_sidebar": True,
     # Whether to aut expand the menu

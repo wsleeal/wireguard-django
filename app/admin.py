@@ -4,11 +4,12 @@ from app import models
 
 @admin.register(models.Server)
 class ServerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("name", "address", "listen_port", "endpoint", "persistent_keepalive", "dst_host")
 
 
 @admin.register(models.Peer)
 class PeerAdmin(admin.ModelAdmin):
+    list_display = ("name", "server", "address", "allowed_ips")
     readonly_fields = ("address",)
     change_form_template = "custom_admin/change_form.html"
 

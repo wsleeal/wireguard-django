@@ -15,7 +15,9 @@
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 15%;
+    width: 16%;
+    align-items: center;
+    align-content: center;
 }
 
 .modal-close {
@@ -24,6 +26,7 @@
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+
 }
 
 .modal-close:hover,
