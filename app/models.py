@@ -1,4 +1,4 @@
-from django.db.models.signals import pre_save, post_save, pre_delete
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.core.validators import validate_ipv4_address
 from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
@@ -69,3 +69,10 @@ def update_conf_from_peer(sender, instance: Peer, **kwargs):
 def delete_server_conf(sender, instance: Server, **kwargs):
     wg_tools.down_wg_interface(server=instance)
     instance.file.delete(save=False)
+
+
+@receiver(post_delete, sender=Peer)
+def delete_peer_conf(sender, instance: Server, **kwargs):
+    # TODO: fazer a interface resetar apos o peer for deletado
+    wg_tools.generate_wg_conf_file(server=instance.server)
+    wg_tools.up_wg_interface(server=instance.server)

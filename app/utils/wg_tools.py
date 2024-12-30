@@ -111,6 +111,9 @@ def up_wg_interface(server: "Server"):
         if interface == server.name:
             subprocess.run(["wg-quick", "down", interface], check=True)
 
+    # TODO: alterar o patch de hard string para o path do arquivo do model
+    print(server.file.path)
+
     config_path = "/etc/wireguard"
     file_path = os.path.join(config_path, f"{server.name}.conf")
     subprocess.run(["wg-quick", "up", file_path], check=True)
