@@ -20,7 +20,6 @@ def generate_wg_conf_content(server: "Server"):
         f"PrivateKey = {server.private_key}",
         r"PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT",
         r"PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT",
-        f"PersistentKeepalive = {server.persistent_keepalive}",
         "",
     ]
 
