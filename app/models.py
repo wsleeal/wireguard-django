@@ -68,13 +68,8 @@ def add_peer_ip(sender, instance: Peer, **kwargs):
 @receiver(post_save, sender=Server)
 def update_conf_from_server(sender, instance: Server, **kwargs):
     wg_tools.generate_wg_conf_file(server=instance)
+    wg_tools.down_wg_interface(server=instance)
     wg_tools.up_wg_interface(server=instance)
-
-
-@receiver(post_save, sender=Peer)
-def update_conf_from_peer(sender, instance: Peer, **kwargs):
-    wg_tools.generate_wg_conf_file(server=instance.server)
-    wg_tools.up_wg_interface(server=instance.server)
 
 
 @receiver(post_delete, sender=Server)
@@ -83,7 +78,15 @@ def delete_server_conf(sender, instance: Server, **kwargs):
     instance.file.delete(save=False)
 
 
-@receiver(post_delete, sender=Peer)
-def delete_peer_conf(sender, instance: Server, **kwargs):
+@receiver(post_save, sender=Peer)
+def update_conf_from_peer(sender, instance: Peer, **kwargs):
     wg_tools.generate_wg_conf_file(server=instance.server)
+    wg_tools.down_wg_interface(server=instance.server)
+    wg_tools.up_wg_interface(server=instance.server)
+
+
+@receiver(post_delete, sender=Peer)
+def delete_peer_conf(sender, instance: Peer, **kwargs):
+    wg_tools.generate_wg_conf_file(server=instance.server)
+    wg_tools.down_wg_interface(server=instance.server)
     wg_tools.up_wg_interface(server=instance.server)

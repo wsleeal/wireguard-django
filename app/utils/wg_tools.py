@@ -2,15 +2,12 @@ from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
 import subprocess
 import os
-import logging
 
 
 try:
     from app.models import Server, Peer
 except:
     pass
-
-logger = logging.getLogger("django")
 
 
 def generate_wg_conf_content(server: "Server"):
@@ -112,13 +109,6 @@ def generate_wg_conf_file(server: "Server"):
 
 
 def up_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
-    interfaces = result.stdout.split()
-    for interface in interfaces:
-        if interface == str(server.id):
-            print("derrubou a interface")
-            subprocess.run(["wg-quick", "down", interface], check=True)
-
     subprocess.run(["wg-quick", "up", server.file.path], check=True)
 
 
