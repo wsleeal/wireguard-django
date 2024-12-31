@@ -93,23 +93,27 @@ def generate_wg_conf_file(server: "Server"):
     from io import BytesIO
     import hashlib
 
+    if not server.id:
+        return
+
     content = generate_wg_conf_content(server)
     content_md5 = hashlib.md5(content.encode()).hexdigest()
 
     if server.file:
-        if os.path.isfile(server.file.path):
+        if os.path.exists(server.file.path):
             if server.file_md5 == content_md5:
                 return
 
     server.file.delete(save=False)
     file_content = BytesIO(content.encode())
-    server.file = File(file_content, name=f"{server.id}.conf")
+    server.file = File(file_content, name=f"{server.name}.conf")
     server.file_md5 = content_md5
     server.save()
 
 
 def up_wg_interface(server: "Server"):
-    subprocess.run(["wg-quick", "up", server.file.path], check=True)
+    if server.file:
+        subprocess.run(["wg-quick", "up", server.file.path], check=True)
 
 
 def down_wg_interface(server: "Server"):
