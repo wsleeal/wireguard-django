@@ -81,6 +81,5 @@ def delete_server_conf(sender, instance: Server, **kwargs):
 
 @receiver(post_delete, sender=Peer)
 def delete_peer_conf(sender, instance: Server, **kwargs):
-    # TODO: fazer a interface resetar apos o peer for deletado
     wg_tools.generate_wg_conf_file(server=instance.server)
     wg_tools.up_wg_interface(server=instance.server)
