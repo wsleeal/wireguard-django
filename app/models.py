@@ -47,6 +47,14 @@ class Peer(BaseModel):
         return self.name
 
 
+class PeerStatus(models.Model):
+    peer = models.ForeignKey(Peer, on_delete=models.CASCADE)
+    endpoint = models.CharField(max_length=50)
+    last_handshake = models.DateTimeField()
+    tx = models.CharField(max_length=255)
+    rx = models.CharField(max_length=255)
+
+
 @receiver(pre_save, sender=Peer)
 def add_peer_ip(sender, instance: Peer, **kwargs):
     if not instance.created_at:

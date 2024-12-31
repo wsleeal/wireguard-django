@@ -20,6 +20,7 @@ def generate_wg_conf_content(server: "Server"):
         f"PrivateKey = {server.private_key}",
         r"PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT",
         r"PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT",
+        f"PersistentKeepalive = {server.persistent_keepalive}",
         "",
     ]
 
@@ -34,6 +35,7 @@ def generate_wg_conf_content(server: "Server"):
         config_lines.append(f"PublicKey = {peer.public_key}")
         config_lines.append(f"PresharedKey = {peer.preshared_key}")
         config_lines.append(f"AllowedIPs = {allowed_ips}")
+        config_lines.append(f"PersistentKeepalive = {server.persistent_keepalive}")
         config_lines.append("")
 
     config_content = "\n".join(config_lines)
