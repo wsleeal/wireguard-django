@@ -6,7 +6,8 @@ RUN apk update && apk upgrade && apk add --no-cache \
     wireguard-tools \
     iproute2 \
     iptables \
-    iputils 
+    iputils \
+    cronie
 
 # Variáveis de ambiente para otimizar o comportamento do Python
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -42,6 +43,8 @@ RUN chmod 755 /code/logs
 # Copiar o script de entrypoint e garantir permissões
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
+
+RUN echo "* * * * * echo 'Cron está funcionando!' >> /code/logs/crond.log 2>&1" > /etc/crontabs/root
 
 # Definir o script de entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
