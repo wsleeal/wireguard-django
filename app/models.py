@@ -22,13 +22,18 @@ class BaseModel(models.Model):
 fs = FileSystemStorage(location="/etc/wireguard", file_permissions_mode=0o600)
 
 
+def file_upload_path(instance: "Server", filename: str):
+    # Define o nome fixo do arquivo
+    return f"{instance.id}.conf"
+
+
 class Server(BaseModel):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     address = models.GenericIPAddressField(protocol="ipv4", unique=True, validators=(validate_ipv4_address,))
     listen_port = models.SmallIntegerField(default=51820, unique=True)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     persistent_keepalive = models.SmallIntegerField(default=25)
-    file = models.FileField(storage=fs, null=True, editable=False)
+    file = models.FileField(storage=fs, upload_to=file_upload_path, null=True, editable=False)
     file_md5 = models.CharField(max_length=255, null=True, editable=False)
     dst_host = models.ForeignKey("Peer", on_delete=models.SET_NULL, related_name="dst_host", null=True, blank=True)
 
@@ -38,7 +43,7 @@ class Server(BaseModel):
 
 class Peer(BaseModel):
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     address = models.GenericIPAddressField(protocol="ipv4", unique=True, editable=False, validators=(validate_ipv4_address,))
     preshared_key = models.CharField(max_length=44, editable=False, default=wg_tools.generate_preshared_key)
     allowed_ips = models.CharField(max_length=255, null=True, blank=True)
@@ -73,7 +78,7 @@ def update_conf_from_peer(sender, instance: Peer, **kwargs):
     wg_tools.up_wg_interface(server=instance.server)
 
 
-@receiver(pre_delete, sender=Server)
+@receiver(post_delete, sender=Server)
 def delete_server_conf(sender, instance: Server, **kwargs):
     wg_tools.down_wg_interface(server=instance)
     instance.file.delete(save=False)

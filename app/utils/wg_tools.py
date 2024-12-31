@@ -16,6 +16,7 @@ def generate_wg_conf_content(server: "Server"):
     config_lines = [
         "[Interface]",
         f"# server: {server.name}",
+        f"# endpoint: {server.endpoint}",
         f"Address = {server.address}",
         f"ListenPort = {server.listen_port}",
         f"PrivateKey = {server.private_key}",
@@ -99,8 +100,8 @@ def generate_wg_conf_file(server: "Server"):
             if server.file_md5 == content_md5:
                 return
 
-    file_content = BytesIO(content.encode())
     server.file.delete(save=False)
+    file_content = BytesIO(content.encode())
     server.file = File(file_content, name=f"{server.id}.conf")
     server.file_md5 = content_md5
     server.save()
@@ -110,7 +111,8 @@ def up_wg_interface(server: "Server"):
     result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
     interfaces = result.stdout.split()
     for interface in interfaces:
-        if interface == server.id:
+        if interface == str(server.id):
+            print("derrubou a interface")
             subprocess.run(["wg-quick", "down", interface], check=True)
 
     subprocess.run(["wg-quick", "up", server.file.path], check=True)
@@ -120,7 +122,7 @@ def down_wg_interface(server: "Server"):
     result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
     interfaces = result.stdout.split()
     for interface in interfaces:
-        if interface == server.name:
+        if interface == str(server.id):
             subprocess.run(["wg-quick", "down", interface], check=True)
 
 
