@@ -24,7 +24,7 @@ fs = FileSystemStorage(location="/etc/wireguard", file_permissions_mode=0o600)
 
 class Server(BaseModel):
     name = models.CharField(max_length=100)
-    address = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
+    address = models.GenericIPAddressField(protocol="ipv4", unique=True, validators=(validate_ipv4_address,))
     listen_port = models.SmallIntegerField(default=51820, unique=True)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     persistent_keepalive = models.SmallIntegerField(default=25)
@@ -39,7 +39,7 @@ class Server(BaseModel):
 class Peer(BaseModel):
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
-    address = models.GenericIPAddressField(protocol="ipv4", editable=False, validators=(validate_ipv4_address,))
+    address = models.GenericIPAddressField(protocol="ipv4", unique=True, editable=False, validators=(validate_ipv4_address,))
     preshared_key = models.CharField(max_length=44, editable=False, default=wg_tools.generate_preshared_key)
     allowed_ips = models.CharField(max_length=255, null=True, blank=True)
 
