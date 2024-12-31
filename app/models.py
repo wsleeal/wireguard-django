@@ -35,7 +35,6 @@ class Server(BaseModel):
     persistent_keepalive = models.SmallIntegerField(default=25)
     file = models.FileField(storage=fs, upload_to=file_upload_path, null=True, editable=False)
     file_md5 = models.CharField(max_length=255, null=True, editable=False)
-    dst_host = models.ForeignKey("Peer", on_delete=models.SET_NULL, related_name="dst_host", null=True, blank=True)
 
     def __str__(self):
         return self.name

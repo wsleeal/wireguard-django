@@ -2,11 +2,15 @@ from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
 import subprocess
 import os
+import logging
+
 
 try:
     from app.models import Server, Peer
 except:
     pass
+
+logger = logging.getLogger("django")
 
 
 def generate_wg_conf_content(server: "Server"):

@@ -4,7 +4,7 @@ from app import models
 
 @admin.register(models.Server)
 class ServerAdmin(admin.ModelAdmin):
-    list_display = ("name", "address", "listen_port", "endpoint", "persistent_keepalive", "dst_host")
+    list_display = ("name", "address", "listen_port", "endpoint", "persistent_keepalive")
 
 
 @admin.register(models.Peer)
