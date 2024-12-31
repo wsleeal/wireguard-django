@@ -32,5 +32,7 @@ class PeerAdmin(admin.ModelAdmin):
 
 @admin.register(models.PeerStatus)
 class PeerStatusAdmin(admin.ModelAdmin):
+    list_display = ("peer", "endpoint", "last_handshake", "tx", "rx")
+
     def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj)
+        return self.list_display
