@@ -19,6 +19,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 
+admin.site.index_template = "custom_admin/index.html"
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("app/", include("app.urls")),
