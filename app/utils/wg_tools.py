@@ -2,12 +2,28 @@ from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
 import subprocess
 import os
-
+import functools
+import logging
 
 try:
     from app.models import Server, Peer
 except:
     pass
+
+logger = logging.getLogger("subprocess")
+
+
+def subprocess_logger(func):
+    @functools.wraps(func)  # Preserva o docstring e outras propriedades
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except subprocess.CalledProcessError as err:
+            logger = logging.getLogger("subprocess")
+            logger.error(err.stderr)
+            raise err
+
+    return wrapper
 
 
 def generate_wg_conf_content(server: "Server"):
@@ -110,17 +126,19 @@ def generate_wg_conf_file(server: "Server"):
     server.save()
 
 
+@subprocess_logger
 def up_wg_interface(server: "Server"):
     if server.file:
-        subprocess.run(["wg-quick", "up", server.file.path], check=True)
+        subprocess.check_output(["wg-quick", "up", server.file.path], stderr=subprocess.PIPE, text=True)
 
 
+@subprocess_logger
 def down_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
-    interfaces = result.stdout.split()
+    result = subprocess.check_output(["wg", "show", "interfaces"], stderr=subprocess.PIPE, text=True)
+    interfaces = result.split()
     for interface in interfaces:
         if interface == str(server.id):
-            subprocess.run(["wg-quick", "down", interface], check=True)
+            subprocess.check_output(["wg-quick", "down", interface], stderr=subprocess.PIPE, text=True)
 
 
 def generate_private_key() -> str:

@@ -153,18 +153,18 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
-        "file": {
-            "level": "WARNING",
+        "django": {
+            "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "django.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "django_erros.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",
         },
-        "request": {
+        "subprocess": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "request_errors.log"),
+            "filename": os.path.join(BASE_DIR, "logs", "subprocess_errors.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",
@@ -172,12 +172,12 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["file", "console"],
+            "handlers": ["django", "console"],
             "propagate": True,
         },
-        "django.request": {
-            "handlers": ["request"],
-            "level": "ERROR",
+        "subprocess": {
+            "handlers": ["subprocess", "console"],
+            "level": "DEBUG",
             "propagate": False,
         },
     },
