@@ -110,5 +110,4 @@ def delete_peer_conf(sender, instance: Peer, **kwargs):
     instance.server.save()
 
 
-# TODO: ajustar o nome do peerstatus no admin
 # TODO: colocar a url para atualizar o peerstatus para funcionar
