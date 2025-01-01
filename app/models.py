@@ -4,6 +4,7 @@ from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
 from django.db import models
 from app.utils import wg_tools
+import os
 
 
 class BaseModel(models.Model):
@@ -19,12 +20,17 @@ class BaseModel(models.Model):
         return wg_tools.generate_public_key(self.private_key)
 
 
-fs = FileSystemStorage(location="/etc/wireguard", file_permissions_mode=0o600)
+class WireguardStorage(FileSystemStorage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._location = "/etc/wireguard"
+        self._file_permissions_mode = 0o600
 
-
-def file_upload_path(instance: "Server", filename: str):
-    # Define o nome fixo do arquivo
-    return f"{instance.id}.conf"
+    def get_available_name(self, name, max_length=None):
+        file_path = os.path.join(self.location, name)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        return name
 
 
 class Server(BaseModel):
@@ -33,7 +39,7 @@ class Server(BaseModel):
     listen_port = models.SmallIntegerField(default=51820, unique=True)
     endpoint = models.GenericIPAddressField(protocol="ipv4", validators=(validate_ipv4_address,))
     persistent_keepalive = models.SmallIntegerField(default=25)
-    file = models.FileField(storage=fs, upload_to=file_upload_path, null=True, editable=False)
+    file = models.FileField(storage=WireguardStorage(), null=True, editable=False)
     file_md5 = models.CharField(max_length=255, null=True, editable=False)
 
     def __str__(self):

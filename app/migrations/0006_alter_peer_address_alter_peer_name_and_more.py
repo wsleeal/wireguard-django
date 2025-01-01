@@ -9,33 +9,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app', '0005_peerstatus'),
+        ("app", "0005_peerstatus"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='peer',
-            name='address',
-            field=models.GenericIPAddressField(editable=False, protocol='ipv4', unique=True, validators=[django.core.validators.validate_ipv4_address]),
+            model_name="peer",
+            name="address",
+            field=models.GenericIPAddressField(editable=False, protocol="ipv4", unique=True, validators=[django.core.validators.validate_ipv4_address]),
         ),
         migrations.AlterField(
-            model_name='peer',
-            name='name',
+            model_name="peer",
+            name="name",
             field=models.CharField(max_length=100, unique=True),
         ),
         migrations.AlterField(
-            model_name='server',
-            name='address',
-            field=models.GenericIPAddressField(protocol='ipv4', unique=True, validators=[django.core.validators.validate_ipv4_address]),
+            model_name="server",
+            name="address",
+            field=models.GenericIPAddressField(protocol="ipv4", unique=True, validators=[django.core.validators.validate_ipv4_address]),
         ),
         migrations.AlterField(
-            model_name='server',
-            name='file',
-            field=models.FileField(editable=False, null=True, storage=django.core.files.storage.FileSystemStorage(file_permissions_mode=384, location='/etc/wireguard'), upload_to=app.models.file_upload_path),
+            model_name="server",
+            name="file",
+            field=models.FileField(editable=False, null=True, storage=django.core.files.storage.FileSystemStorage(file_permissions_mode=384, location="/etc/wireguard")),
         ),
         migrations.AlterField(
-            model_name='server',
-            name='name',
+            model_name="server",
+            name="name",
             field=models.CharField(max_length=100, unique=True),
         ),
     ]

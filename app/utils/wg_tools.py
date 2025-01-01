@@ -104,9 +104,8 @@ def generate_wg_conf_file(server: "Server"):
             if server.file_md5 == content_md5:
                 return
 
-    server.file.delete(save=False)
     file_content = BytesIO(content.encode())
-    server.file = File(file_content, name=f"{server.name}.conf")
+    server.file = File(file_content, name=f"{server.id}.conf")
     server.file_md5 = content_md5
     server.save()
 
