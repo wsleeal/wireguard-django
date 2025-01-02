@@ -2,11 +2,28 @@ from nacl.public import PrivateKey
 from nacl.encoding import Base64Encoder
 import subprocess
 import os
+import functools
+import logging
 
 try:
     from app.models import Server, Peer
 except:
     pass
+
+logger = logging.getLogger("subprocess")
+
+
+def subprocess_logger(func):
+    @functools.wraps(func)  # Preserva o docstring e outras propriedades
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except subprocess.CalledProcessError as err:
+            logger = logging.getLogger("subprocess")
+            logger.error(err.stderr)
+            raise err
+
+    return wrapper
 
 
 def generate_wg_conf_content(server: "Server"):
@@ -15,6 +32,8 @@ def generate_wg_conf_content(server: "Server"):
 
     config_lines = [
         "[Interface]",
+        f"# server: {server.name}",
+        f"# endpoint: {server.endpoint}",
         f"Address = {server.address}",
         f"ListenPort = {server.listen_port}",
         f"PrivateKey = {server.private_key}",
@@ -34,6 +53,7 @@ def generate_wg_conf_content(server: "Server"):
         config_lines.append(f"PublicKey = {peer.public_key}")
         config_lines.append(f"PresharedKey = {peer.preshared_key}")
         config_lines.append(f"AllowedIPs = {allowed_ips}")
+        config_lines.append(f"PersistentKeepalive = {server.persistent_keepalive}")
         config_lines.append("")
 
     config_content = "\n".join(config_lines)
@@ -52,12 +72,6 @@ def generate_peer_conf_content(peer: "Peer") -> str:
     for neighbor in neighbors:
         if neighbor.allowed_ips:
             for cidr in neighbor.allowed_ips.split(","):
-                allowed_ips.add(cidr.strip())
-
-    if peer.server.dst_host and peer.server.dst_host.allowed_ips:
-        allowed_ips.clear()
-        for cidr in peer.server.dst_host.allowed_ips.split(","):
-            if peer.pk != peer.server.pk:
                 allowed_ips.add(cidr.strip())
 
     allowed_ips.add(f"{peer.server.address}/32")
@@ -89,42 +103,36 @@ def generate_wg_conf_file(server: "Server"):
     from io import BytesIO
     import hashlib
 
+    if not server.id:
+        return
+
     content = generate_wg_conf_content(server)
     content_md5 = hashlib.md5(content.encode()).hexdigest()
 
     if server.file:
-        if os.path.isfile(server.file.path):
+        if os.path.exists(server.file.path):
             if server.file_md5 == content_md5:
                 return
 
     file_content = BytesIO(content.encode())
-    server.file.delete(save=False)
-    server.file = File(file_content, name=f"{server.name}.conf")
+    server.file = File(file_content, name=f"{server.id}.conf")
     server.file_md5 = content_md5
     server.save()
 
 
+@subprocess_logger
 def up_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
-    interfaces = result.stdout.split()
-    for interface in interfaces:
-        if interface == server.name:
-            subprocess.run(["wg-quick", "down", interface], check=True)
-
-    # TODO: alterar o patch de hard string para o path do arquivo do model
-    print(server.file.path)
-
-    config_path = "/etc/wireguard"
-    file_path = os.path.join(config_path, f"{server.name}.conf")
-    subprocess.run(["wg-quick", "up", file_path], check=True)
+    if server.file:
+        subprocess.check_output(["wg-quick", "up", server.file.path], stderr=subprocess.PIPE, text=True)
 
 
+@subprocess_logger
 def down_wg_interface(server: "Server"):
-    result = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
-    interfaces = result.stdout.split()
+    result = subprocess.check_output(["wg", "show", "interfaces"], stderr=subprocess.PIPE, text=True)
+    interfaces = result.split()
     for interface in interfaces:
-        if interface == server.name:
-            subprocess.run(["wg-quick", "down", interface], check=True)
+        if interface == str(server.id):
+            subprocess.check_output(["wg-quick", "down", interface], stderr=subprocess.PIPE, text=True)
 
 
 def generate_private_key() -> str:

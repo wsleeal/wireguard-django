@@ -1,11 +1,13 @@
 // ADICIONAR BOTAO PARA GERAR PEER.CONF
 document.addEventListener("DOMContentLoaded", function () {
     const utils = document.getElementById("model-data-utils");
-    const submitRow = document.querySelector(".submit-row");
-    if (submitRow) {
+    const submitRow = document.querySelector(".object-tools");
+    if (submitRow && utils) {
+        console.log("1");
         const custonInput1 = document.createElement("input");
         custonInput1.type = "submit";
         custonInput1.value = "Download config";
+        custonInput1.className = "btn btn-block btn-secondary btn-sm";
         custonInput1.onclick = function (event) {
             event.preventDefault();
             const url = utils.getAttribute("data-url");
@@ -15,13 +17,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const custonInput2= document.createElement("input");
         custonInput2.type = "submit";
         custonInput2.value = "Show QRCode";
-        custonInput2.className = "btn-open-modal";
+        custonInput2.className = "btn btn-block btn-secondary btn-sm btn-open-modal";
         custonInput2.onclick = function (event) {
             event.preventDefault();
         
         };
             
-        const saveButton = submitRow.querySelector(".submit-row > input:nth-child(3)");
+        const saveButton = submitRow.querySelector(".btn-block");
         if (saveButton && utils) {            
             submitRow.insertBefore(custonInput2, saveButton.nextSibling);
             submitRow.insertBefore(custonInput1, saveButton.nextSibling);

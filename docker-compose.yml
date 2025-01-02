@@ -12,9 +12,10 @@ services:
       - TZ=America/Sao_Paulo 
     volumes:
       - .:/code
-      # - ./database:/code/database
-      - ./logs:/code/logs
-      - ./wg_configs:/etc/wireguard 
+      - ./log:/code/log
+      - ./backup:/code/backup
+      - ./database:/code/database
+      - ./wg_configs:/etc/wireguard
     ports:
       - 8000:8000
       - 51820:51820/udp

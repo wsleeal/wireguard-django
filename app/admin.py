@@ -4,11 +4,12 @@ from app import models
 
 @admin.register(models.Server)
 class ServerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("id", "name", "address", "listen_port", "endpoint", "persistent_keepalive")
 
 
 @admin.register(models.Peer)
 class PeerAdmin(admin.ModelAdmin):
+    list_display = ("name", "server", "address", "allowed_ips")
     readonly_fields = ("address",)
     change_form_template = "custom_admin/change_form.html"
 
@@ -27,3 +28,15 @@ class PeerAdmin(admin.ModelAdmin):
         css = {
             "all": ("css/custom_admin.css",),
         }
+
+
+@admin.register(models.PeerStatus)
+class PeerStatusAdmin(admin.ModelAdmin):
+    list_display = ("peer", "endpoint", "last_handshake", "tx", "rx")
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = set()
+        for field in self.list_display:
+            readonly_fields.add(field)
+        readonly_fields.add("updated_at")
+        return readonly_fields

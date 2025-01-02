@@ -1,6 +1,7 @@
 __pycache__/
 wg_configs/
 database/
+backup/
 db.sqlite3
 .venv/
 *.pyc
@@ -10,4 +11,4 @@ Dockerfile
 .dockerignore
 .git/
 .gitignore
-logs/
+log/
