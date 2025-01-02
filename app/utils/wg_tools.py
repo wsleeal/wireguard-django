@@ -21,7 +21,7 @@ def subprocess_logger(func):
         except subprocess.CalledProcessError as err:
             logger = logging.getLogger("subprocess")
             logger.error(err.stderr)
-            # raise err
+            raise err
 
     return wrapper
 
