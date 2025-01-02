@@ -74,12 +74,6 @@ def generate_peer_conf_content(peer: "Peer") -> str:
             for cidr in neighbor.allowed_ips.split(","):
                 allowed_ips.add(cidr.strip())
 
-    if peer.server.dst_host and peer.server.dst_host.allowed_ips:
-        allowed_ips.clear()
-        for cidr in peer.server.dst_host.allowed_ips.split(","):
-            if peer.pk != peer.server.pk:
-                allowed_ips.add(cidr.strip())
-
     allowed_ips.add(f"{peer.server.address}/32")
     allowed_ips.add(f"{peer.address}/32")
 
