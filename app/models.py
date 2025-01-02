@@ -110,6 +110,3 @@ def reload_peer_interface(sender, instance: Peer, **kwargs):
 @receiver(post_delete, sender=Peer)
 def delete_peer_conf(sender, instance: Peer, **kwargs):
     instance.server.save()
-
-
-# TODO: colocar a url para atualizar o peerstatus para funcionar
