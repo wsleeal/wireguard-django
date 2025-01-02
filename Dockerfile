@@ -44,7 +44,7 @@ RUN chmod 755 /code/logs
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-RUN echo "* * * * * python manage.py update_peer_status" > /etc/crontabs/root
+RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_peers_status" > /etc/crontabs/root
 
 # Definir o script de entrypoint
 ENTRYPOINT ["/entrypoint.sh"]

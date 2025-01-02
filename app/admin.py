@@ -35,4 +35,8 @@ class PeerStatusAdmin(admin.ModelAdmin):
     list_display = ("peer", "endpoint", "last_handshake", "tx", "rx")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.list_display
+        readonly_fields = set()
+        for field in self.list_display:
+            readonly_fields.add(field)
+        readonly_fields.add("updated_at")
+        return readonly_fields

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from app.models import Peer, PeerStatus
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import subprocess
 from app.utils import wg_tools
 
@@ -21,7 +22,7 @@ class Status:
         return {
             "peer_id": peer.id,
             "endpoint": self.endpoint,
-            "last_handshake": datetime.fromtimestamp(int(self.last_handshake)),
+            "last_handshake": datetime.fromtimestamp(int(self.last_handshake), tz=ZoneInfo("America/Sao_Paulo")),
             "tx": self.tx,
             "rx": self.rx,
         }
@@ -43,3 +44,5 @@ class Command(BaseCommand):
             for status in peer_status:
                 if status.public_key == peer.public_key:
                     PeerStatus.objects.update_or_create(defaults=status.defaults(peer), id=peer.id)
+
+        wg_tools.logger.debug("Peers atualizados!")
