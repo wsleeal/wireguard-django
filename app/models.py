@@ -79,6 +79,8 @@ class PeerStatus(models.Model):
     last_handshake = models.DateTimeField()
     tx = models.CharField(max_length=255)
     rx = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 @receiver(pre_save, sender=Peer)

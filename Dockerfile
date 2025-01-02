@@ -44,7 +44,7 @@ RUN chmod 755 /code/logs
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-RUN echo "* * * * * echo 'Cron está funcionando!' >> /code/logs/crond.log 2>&1" > /etc/crontabs/root
+RUN echo "* * * * * python manage.py update_peer_status" > /etc/crontabs/root
 
 # Definir o script de entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
