@@ -156,7 +156,7 @@ LOGGING = {
         "django": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "django_erros.log"),
+            "filename": os.path.join(BASE_DIR, "log", "django_erros.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",
@@ -164,7 +164,7 @@ LOGGING = {
         "subprocess": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "logs", "subprocess_errors.log"),
+            "filename": os.path.join(BASE_DIR, "log", "subprocess_errors.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 5,
             "formatter": "verbose",

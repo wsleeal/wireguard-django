@@ -11,4 +11,4 @@ Dockerfile
 .dockerignore
 .git/
 .gitignore
-logs/
+log/

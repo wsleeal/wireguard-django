@@ -5,4 +5,4 @@ backup/
 db.sqlite3
 .venv/
 *.pyc
-logs/
+log/

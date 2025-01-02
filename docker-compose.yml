@@ -12,7 +12,7 @@ services:
       - TZ=America/Sao_Paulo 
     volumes:
       - .:/code
-      - ./logs:/code/logs
+      - ./log:/code/log
       - ./backup:/code/backup
       - ./database:/code/database
       - ./wg_configs:/etc/wireguard
