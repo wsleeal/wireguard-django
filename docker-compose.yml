@@ -13,6 +13,7 @@ services:
     volumes:
       - .:/code
       - ./logs:/code/logs
+      - ./backup:/code/backup
       - ./database:/code/database
       - ./wg_configs:/etc/wireguard
     ports:
