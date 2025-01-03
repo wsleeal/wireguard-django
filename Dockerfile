@@ -44,6 +44,7 @@ RUN mkdir -p /code/log
 
 # Copiar o script de entrypoint e garantir permissões
 COPY script/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 # CRON Jobs
 RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_status" > /etc/crontabs/root
