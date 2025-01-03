@@ -74,7 +74,12 @@ def generate_peer_conf_content(peer: "Peer") -> str:
             for cidr in neighbor.allowed_ips.split(","):
                 allowed_ips.add(cidr.strip())
 
-    allowed_ips.add(f"{peer.server.address}/32")
+        if neighbor.central:
+            allowed_ips.clear()
+            for cidr in neighbor.allowed_ips.split(","):
+                allowed_ips.add(cidr.strip())
+            break
+
     allowed_ips.add(f"{peer.address}/32")
 
     config_lines = [

@@ -65,6 +65,7 @@ class Peer(BaseModel):
     address = models.GenericIPAddressField(protocol="ipv4", unique=True, editable=False, validators=(validate_ipv4_address,))
     preshared_key = models.CharField(max_length=44, editable=False, default=wg_tools.generate_preshared_key)
     allowed_ips = models.CharField(max_length=255, null=True, blank=True)
+    central = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
