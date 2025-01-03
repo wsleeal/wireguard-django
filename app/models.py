@@ -74,11 +74,19 @@ class PeerStatus(models.Model):
         verbose_name_plural = "Status"
         ordering = ["id"]
 
-    peer = models.ForeignKey(Peer, on_delete=models.CASCADE)
-    endpoint = models.CharField(max_length=50)
+    peer = models.ForeignKey(Peer, on_delete=models.CASCADE, editable=False)
+
+
+class PeerStatusUnit(models.Model):
+    server_name = models.CharField(max_length=255)
+    public_key = models.CharField(max_length=255)
+    preshared_key = models.CharField(max_length=255)
+    endpoint = models.CharField(max_length=255)
+    allowed_hosts = models.CharField(max_length=255)
     last_handshake = models.DateTimeField()
     tx = models.CharField(max_length=255)
     rx = models.CharField(max_length=255)
+    keepaline = models.SmallIntegerField(default=25)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,13 +1,13 @@
 from django.contrib import admin
-from app import models
+from app.models import Server, Peer, PeerStatus, PeerStatusUnit
 
 
-@admin.register(models.Server)
+@admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "address", "listen_port", "endpoint", "persistent_keepalive")
 
 
-@admin.register(models.Peer)
+@admin.register(Peer)
 class PeerAdmin(admin.ModelAdmin):
     list_display = ("name", "server", "address", "allowed_ips")
     readonly_fields = ("address",)
@@ -16,7 +16,7 @@ class PeerAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "server":
             if db_field.blank:
-                kwargs["queryset"] = models.Server.objects.filter(name="123")
+                kwargs["queryset"] = Server.objects.filter(name="123")
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -30,13 +30,38 @@ class PeerAdmin(admin.ModelAdmin):
         }
 
 
-@admin.register(models.PeerStatus)
+@admin.register(PeerStatus)
 class PeerStatusAdmin(admin.ModelAdmin):
-    list_display = ("peer", "endpoint", "last_handshake", "tx", "rx")
+    list_display = ("peer", "online", "last_handshake", "tx", "rx")
 
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = set()
-        for field in self.list_display:
-            readonly_fields.add(field)
-        readonly_fields.add("updated_at")
-        return readonly_fields
+    @admin.display(boolean=True, description="Online")
+    def online(self, obj: PeerStatus):
+
+        last_two_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).order_by("-created_at")[:2]
+        count = last_two_status.count()
+
+        if count == 0:
+            return None
+
+        if count > 0 and count < 2:
+            status_new = last_two_status.get()
+            rx_new, rx_old = int(status_new.rx), 0
+        else:
+            status_new, status_old = last_two_status
+            rx_new, rx_old = int(status_new.rx), int(status_old.rx)
+
+        if sum([rx_new, rx_old]) and rx_new > rx_old:
+            return True
+        return False
+
+    def last_handshake(self, obj: PeerStatus):
+        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
+        return last_status.last_handshake
+
+    def tx(self, obj: PeerStatus):
+        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
+        return last_status.tx
+
+    def rx(self, obj: PeerStatus):
+        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
+        return last_status.rx

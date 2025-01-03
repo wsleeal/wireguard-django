@@ -3,7 +3,6 @@ name: wireguard
 services:
   backend:
     build: .
-    # image: wireguard-docker:latest
     container_name: wireguard
     cap_add:
       - NET_ADMIN

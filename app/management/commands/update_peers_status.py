@@ -1,31 +1,23 @@
 from django.core.management.base import BaseCommand
-from app.models import Peer, PeerStatus
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import subprocess
 from app.utils import wg_tools
+from app.models import PeerStatusUnit
 
 
-class Status:
-    def __init__(self, status: list):
-        self.server_name = status[0]
-        self.public_key = status[1]
-        self.preshared_key = status[2]
-        self.endpoint = status[3]
-        self.allowed_hosts = status[4]
-        self.last_handshake = status[5]
-        self.tx = status[6]
-        self.rx = status[7]
-        self.keepaline = status[8]
-
-    def defaults(self, peer: Peer):
-        return {
-            "peer_id": peer.id,
-            "endpoint": self.endpoint,
-            "last_handshake": datetime.fromtimestamp(int(self.last_handshake), tz=ZoneInfo("America/Sao_Paulo")),
-            "tx": self.tx,
-            "rx": self.rx,
-        }
+def status_dict(status):
+    return {
+        "server_name": status[0],
+        "public_key": status[1],
+        "preshared_key": status[2],
+        "endpoint": status[3],
+        "allowed_hosts": status[4],
+        "last_handshake": datetime.fromtimestamp(int(status[5]), tz=ZoneInfo("America/Sao_Paulo")),
+        "tx": status[6],
+        "rx": status[7],
+        "keepaline": status[8],
+    }
 
 
 class Command(BaseCommand):
@@ -34,15 +26,9 @@ class Command(BaseCommand):
     @wg_tools.subprocess_logger
     def handle(self, *args, **kwargs):
         result = subprocess.check_output(["wg", "show", "all", "dump"], stderr=subprocess.PIPE, text=True)
-        peer_status: list[Status] = list()
         for line in result.split("\n"):
             column = line.split()
             if len(column) == 9:
-                peer_status.append(Status(column))
-
-        for peer in Peer.objects.all():
-            for status in peer_status:
-                if status.public_key == peer.public_key:
-                    PeerStatus.objects.update_or_create(defaults=status.defaults(peer), id=peer.id)
+                PeerStatusUnit.objects.create(**status_dict(column))
 
         wg_tools.logger.debug("Peers atualizados!")
