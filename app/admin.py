@@ -30,6 +30,9 @@ class PeerAdmin(admin.ModelAdmin):
         }
 
 
+from django.db.models import QuerySet
+
+
 @admin.register(PeerStatus)
 class PeerStatusAdmin(admin.ModelAdmin):
     list_display = ("peer", "online", "last_handshake", "tx", "rx")
@@ -41,34 +44,41 @@ class PeerStatusAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+    def get_peer_status_units(self, peer_public_key: str) -> QuerySet:
+        """
+        Retorna os dois últimos registros de PeerStatusUnit para a chave pública fornecida.
+        """
+        return PeerStatusUnit.objects.filter(public_key=peer_public_key).order_by("-created_at")[:2]
+
     @admin.display(boolean=True, description="Online")
     def online(self, obj: PeerStatus):
-
-        last_two_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).order_by("-created_at")[:2]
-        count = last_two_status.count()
-
-        if count == 0:
+        last_two_status = self.get_peer_status_units(obj.peer.public_key)
+        if not last_two_status.exists():
             return None
 
-        if count > 0 and count < 2:
-            status_new = last_two_status.get()
-            rx_new, rx_old = int(status_new.rx), 0
+        if last_two_status.count() == 1:
+            rx_new = int(last_two_status[0].rx)
+            rx_old = 0
         else:
-            status_new, status_old = last_two_status
-            rx_new, rx_old = int(status_new.rx), int(status_old.rx)
+            rx_new = int(last_two_status[0].rx)
+            rx_old = int(last_two_status[1].rx)
 
-        if sum([rx_new, rx_old]) and rx_new > rx_old:
-            return True
-        return False
+        return rx_new > rx_old
+
+    def get_last_status(self, peer_public_key: str):
+        """
+        Retorna o último registro de PeerStatusUnit para a chave pública fornecida.
+        """
+        return PeerStatusUnit.objects.filter(public_key=peer_public_key).last()
 
     def last_handshake(self, obj: PeerStatus):
-        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
-        return last_status.last_handshake
+        last_status = self.get_last_status(obj.peer.public_key)
+        return last_status.last_handshake if last_status else None
 
     def tx(self, obj: PeerStatus):
-        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
-        return last_status.tx
+        last_status = self.get_last_status(obj.peer.public_key)
+        return last_status.tx if last_status else None
 
     def rx(self, obj: PeerStatus):
-        last_status = PeerStatusUnit.objects.filter(public_key=obj.peer.public_key).last()
-        return last_status.rx
+        last_status = self.get_last_status(obj.peer.public_key)
+        return last_status.rx if last_status else None
