@@ -54,7 +54,7 @@ RUN echo "0 0 * * * sh /code/script/backup.sh" >> /etc/crontabs/root
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Expor as portas do aplicativo e WireGuard
-EXPOSE 8000 51820-51830/udp
+EXPOSE 8000 51820/udp
 
 # Comando padrão para rodar o servidor Django
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
