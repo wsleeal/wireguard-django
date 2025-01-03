@@ -3,7 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import subprocess
 from app.utils import wg_tools
-from app.models import PeerStatusUnit, PeerStatus, Peer
+from app.models import PeerStatusUnit, PeerStatus, Peer, Server
 
 
 def status_dict(status):
@@ -31,11 +31,13 @@ class Command(BaseCommand):
             if len(column) == 9:
                 PeerStatusUnit.objects.create(**status_dict(column))
 
-        wg_tools.logger.debug("Peers atualizados!")
-
         peers = Peer.objects.all()
         if peers.count():
             for peer in peers.all():
                 PeerStatus.objects.update_or_create(peer_id=peer.id, defaults={})
 
         PeerStatusUnit.keep_only_two_recent()
+
+        if not len(result):
+            for server in Server.objects.all():
+                server.save()
