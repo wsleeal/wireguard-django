@@ -33,6 +33,13 @@ class PeerAdmin(admin.ModelAdmin):
 @admin.register(PeerStatus)
 class PeerStatusAdmin(admin.ModelAdmin):
     list_display = ("peer", "online", "last_handshake", "tx", "rx")
+    readonly_fields = ("peer", "online", "last_handshake", "tx", "rx")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
     @admin.display(boolean=True, description="Online")
     def online(self, obj: PeerStatus):
