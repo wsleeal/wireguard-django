@@ -41,14 +41,12 @@ RUN mkdir -p /code/backup
 
 # Criar o diretório de logs e garantir permissões
 RUN mkdir -p /code/log
-RUN chmod 755 /code/log
 
 # Copiar o script de entrypoint e garantir permissões
 COPY script/entrypoint.sh /
-RUN chmod +x /entrypoint.sh
 
 # CRON Jobs
-RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_peers_status" > /etc/crontabs/root
+RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_status" > /etc/crontabs/root
 RUN echo "0 0 * * * sh /code/script/backup.sh" >> /etc/crontabs/root
 
 # Definir o script de entrypoint
