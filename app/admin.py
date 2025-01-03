@@ -1,5 +1,6 @@
 from django.contrib import admin
 from app.models import Server, Peer, PeerStatus, PeerStatusUnit
+from django.utils import timezone
 
 
 @admin.register(Server)
@@ -41,32 +42,19 @@ class PeerStatusAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    def get_peer_status_units(self, peer_public_key: str):
-        """
-        Retorna os dois últimos registros de PeerStatusUnit para a chave pública fornecida.
-        """
-        return PeerStatusUnit.objects.filter(public_key=peer_public_key).order_by("-created_at")[:2]
-
-    @admin.display(boolean=True, description="Online")
-    def online(self, obj: PeerStatus):
-        last_two_status = self.get_peer_status_units(obj.peer.public_key)
-        if not last_two_status.exists():
-            return None
-
-        if last_two_status.count() == 1:
-            rx_new = int(last_two_status[0].rx)
-            rx_old = 0
-        else:
-            rx_new = int(last_two_status[0].rx)
-            rx_old = int(last_two_status[1].rx)
-
-        return rx_new > rx_old
-
     def get_last_status(self, peer_public_key: str):
         """
         Retorna o último registro de PeerStatusUnit para a chave pública fornecida.
         """
         return PeerStatusUnit.objects.filter(public_key=peer_public_key).last()
+
+    @admin.display(boolean=True, description="Online")
+    def online(self, obj: PeerStatus):
+        status = self.get_last_status(obj.peer.public_key)
+        if status:
+            diff = timezone.now() - status.last_handshake
+            return diff.total_seconds() < 120
+        return None
 
     def last_handshake(self, obj: PeerStatus):
         last_status = self.get_last_status(obj.peer.public_key)

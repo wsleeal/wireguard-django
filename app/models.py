@@ -95,17 +95,6 @@ class PeerStatusUnit(models.Model):
     @classmethod
     def keep_only_two_recent(cls):
         """
-        Mantém apenas os dois registros mais recentes e exclui os demais.
-        """
-        # Obtém os IDs dos dois registros mais recentes
-        recent_ids = cls.objects.order_by("-created_at").values_list("id", flat=True)[:2]
-
-        # Exclui os registros que não estão entre os dois mais recentes
-        cls.objects.exclude(id__in=recent_ids).delete()
-
-    @classmethod
-    def keep_only_two_recent(cls):
-        """
         Mantém apenas os dois registros mais recentes para cada public_key e exclui os demais.
         """
         # Subconsulta para obter os IDs dos dois mais recentes para cada public_key
