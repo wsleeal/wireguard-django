@@ -30,9 +30,6 @@ class PeerAdmin(admin.ModelAdmin):
         }
 
 
-from django.db.models import QuerySet
-
-
 @admin.register(PeerStatus)
 class PeerStatusAdmin(admin.ModelAdmin):
     list_display = ("peer", "online", "last_handshake", "tx", "rx")
@@ -44,7 +41,7 @@ class PeerStatusAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
-    def get_peer_status_units(self, peer_public_key: str) -> QuerySet:
+    def get_peer_status_units(self, peer_public_key: str):
         """
         Retorna os dois últimos registros de PeerStatusUnit para a chave pública fornecida.
         """

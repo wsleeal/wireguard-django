@@ -108,25 +108,6 @@ class PeerStatusUnit(models.Model):
         """
         Mantém apenas os dois registros mais recentes para cada public_key e exclui os demais.
         """
-        # Obtém todas as public_keys únicas
-        public_keys = cls.objects.values_list("public_key", flat=True).distinct()
-
-        # Constrói uma consulta para excluir registros antigos para cada public_key
-        exclude_conditions = Q()
-        for public_key in public_keys:
-            # Obtém os IDs dos dois registros mais recentes para a public_key atual
-            recent_ids = cls.objects.filter(public_key=public_key).order_by("-created_at").values_list("id", flat=True)[:2]
-            # Adiciona à condição de exclusão: registros que não estão entre os recentes
-            exclude_conditions |= Q(public_key=public_key) & ~Q(id__in=recent_ids)
-
-        # Exclui os registros que não estão entre os dois mais recentes para cada public_key
-        cls.objects.filter(exclude_conditions).delete()
-
-    @classmethod
-    def keep_only_two_recent_performatic(cls):
-        """
-        Mantém apenas os dois registros mais recentes para cada public_key e exclui os demais.
-        """
         # Subconsulta para obter os IDs dos dois mais recentes para cada public_key
         recent_ids = cls.objects.filter(public_key=OuterRef("public_key")).order_by("-created_at").values("id")[:2]
 

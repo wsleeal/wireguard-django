@@ -38,4 +38,4 @@ class Command(BaseCommand):
             for peer in peers.all():
                 PeerStatus.objects.update_or_create(peer_id=peer.id, defaults={})
 
-        # PeerStatusUnit.keep_only_two_recent()
+        PeerStatusUnit.keep_only_two_recent()
