@@ -74,7 +74,7 @@ class PeerStatus(models.Model):
         verbose_name_plural = "Status"
         ordering = ["id"]
 
-    peer = models.ForeignKey(Peer, on_delete=models.CASCADE, editable=False)
+    peer = models.OneToOneField(Peer, on_delete=models.CASCADE, editable=False)
 
 
 class PeerStatusUnit(models.Model):
