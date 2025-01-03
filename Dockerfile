@@ -48,7 +48,7 @@ COPY script/entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
 # CRON Jobs
-RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_peers_status" > /etc/crontabs/root
+RUN echo "* * * * * /opt/venv/bin/python /code/manage.py update_status" > /etc/crontabs/root
 RUN echo "0 0 * * * sh /code/script/backup.sh" >> /etc/crontabs/root
 
 # Definir o script de entrypoint
