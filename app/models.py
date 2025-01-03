@@ -2,6 +2,8 @@ from django.db.models.signals import pre_save, post_save, pre_delete, post_delet
 from django.core.validators import validate_ipv4_address
 from django.core.files.storage import FileSystemStorage
 from django.dispatch import receiver
+from django.db.models import OuterRef, Subquery
+from django.db.models import Q
 from django.db import models
 from app.utils import wg_tools
 import os
@@ -89,6 +91,50 @@ class PeerStatusUnit(models.Model):
     keepaline = models.SmallIntegerField(default=25)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def keep_only_two_recent(cls):
+        """
+        Mantém apenas os dois registros mais recentes e exclui os demais.
+        """
+        # Obtém os IDs dos dois registros mais recentes
+        recent_ids = cls.objects.order_by("-created_at").values_list("id", flat=True)[:2]
+
+        # Exclui os registros que não estão entre os dois mais recentes
+        cls.objects.exclude(id__in=recent_ids).delete()
+
+    @classmethod
+    def keep_only_two_recent(cls):
+        """
+        Mantém apenas os dois registros mais recentes para cada public_key e exclui os demais.
+        """
+        # Obtém todas as public_keys únicas
+        public_keys = cls.objects.values_list("public_key", flat=True).distinct()
+
+        # Constrói uma consulta para excluir registros antigos para cada public_key
+        exclude_conditions = Q()
+        for public_key in public_keys:
+            # Obtém os IDs dos dois registros mais recentes para a public_key atual
+            recent_ids = cls.objects.filter(public_key=public_key).order_by("-created_at").values_list("id", flat=True)[:2]
+            # Adiciona à condição de exclusão: registros que não estão entre os recentes
+            exclude_conditions |= Q(public_key=public_key) & ~Q(id__in=recent_ids)
+
+        # Exclui os registros que não estão entre os dois mais recentes para cada public_key
+        cls.objects.filter(exclude_conditions).delete()
+
+    @classmethod
+    def keep_only_two_recent_performatic(cls):
+        """
+        Mantém apenas os dois registros mais recentes para cada public_key e exclui os demais.
+        """
+        # Subconsulta para obter os IDs dos dois mais recentes para cada public_key
+        recent_ids = cls.objects.filter(public_key=OuterRef("public_key")).order_by("-created_at").values("id")[:2]
+
+        # Obtém os IDs a serem mantidos
+        ids_to_keep = cls.objects.filter(id__in=Subquery(recent_ids)).values_list("id", flat=True)
+
+        # Exclui os registros que não estão nos IDs a serem mantidos
+        cls.objects.exclude(id__in=ids_to_keep).delete()
 
 
 @receiver(pre_save, sender=Peer)
