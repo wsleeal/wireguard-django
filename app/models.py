@@ -59,6 +59,9 @@ class Peer(BaseModel):
         verbose_name = "Peer"
         verbose_name_plural = "Peers"
         ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(fields=["server"], condition=Q(central=True), name="unique_central_peer_per_server"),
+        ]
 
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
