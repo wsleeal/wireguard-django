@@ -59,12 +59,16 @@ class Peer(BaseModel):
         verbose_name = "Peer"
         verbose_name_plural = "Peers"
         ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(fields=["server"], condition=Q(central=True), name="unique_central_peer_per_server"),
+        ]
 
     server = models.ForeignKey(Server, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField(protocol="ipv4", unique=True, editable=False, validators=(validate_ipv4_address,))
     preshared_key = models.CharField(max_length=44, editable=False, default=wg_tools.generate_preshared_key)
     allowed_ips = models.CharField(max_length=255, null=True, blank=True)
+    central = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -91,17 +95,6 @@ class PeerStatusUnit(models.Model):
     keepaline = models.SmallIntegerField(default=25)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    @classmethod
-    def keep_only_two_recent(cls):
-        """
-        Mantém apenas os dois registros mais recentes e exclui os demais.
-        """
-        # Obtém os IDs dos dois registros mais recentes
-        recent_ids = cls.objects.order_by("-created_at").values_list("id", flat=True)[:2]
-
-        # Exclui os registros que não estão entre os dois mais recentes
-        cls.objects.exclude(id__in=recent_ids).delete()
 
     @classmethod
     def keep_only_two_recent(cls):

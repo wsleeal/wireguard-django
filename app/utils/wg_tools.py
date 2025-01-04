@@ -74,7 +74,12 @@ def generate_peer_conf_content(peer: "Peer") -> str:
             for cidr in neighbor.allowed_ips.split(","):
                 allowed_ips.add(cidr.strip())
 
-    allowed_ips.add(f"{peer.server.address}/32")
+        if neighbor.central:
+            allowed_ips.clear()
+            for cidr in neighbor.allowed_ips.split(","):
+                allowed_ips.add(cidr.strip())
+            break
+
     allowed_ips.add(f"{peer.address}/32")
 
     config_lines = [
@@ -123,16 +128,16 @@ def generate_wg_conf_file(server: "Server"):
 @subprocess_logger
 def up_wg_interface(server: "Server"):
     if server.file:
-        subprocess.check_output(["wg-quick", "up", server.file.path], stderr=subprocess.PIPE, text=True)
+        subprocess.run(["wg-quick", "up", server.file.path], capture_output=True, text=True, check=True)
 
 
 @subprocess_logger
 def down_wg_interface(server: "Server"):
-    result = subprocess.check_output(["wg", "show", "interfaces"], stderr=subprocess.PIPE, text=True)
-    interfaces = result.split()
+    output = subprocess.run(["wg", "show", "interfaces"], capture_output=True, text=True, check=True)
+    interfaces = output.stdout.split()
     for interface in interfaces:
         if interface == str(server.id):
-            subprocess.check_output(["wg-quick", "down", interface], stderr=subprocess.PIPE, text=True)
+            subprocess.run(["wg-quick", "down", interface], capture_output=True, text=True, check=True)
 
 
 def generate_private_key() -> str:
